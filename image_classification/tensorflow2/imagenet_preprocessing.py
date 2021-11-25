@@ -62,6 +62,27 @@ CHANNEL_MEANS = [_R_MEAN, _G_MEAN, _B_MEAN]
 # _RESIZE_MIN x (_RESIZE_MIN * 2).
 _RESIZE_MIN = 256
 
+
+flags.DEFINE_boolean(name='use_tf_function', default=True,
+                     help='Wrap the train and test step inside a '
+                     'tf.function.')
+flags.DEFINE_boolean(name='single_l2_loss_op', default=False,
+                    help='Calculate L2_loss on concatenated weights, '
+                    'instead of using Keras per-layer L2 loss.')
+flags.DEFINE_boolean(name='cache_decoded_image', default=False,
+                    help='Whether or not to cache decoded images in the '
+                    'input pipeline. If this flag and `cache` is enabled, '
+                    'then TFExample protos will be parsed and then cached '
+                    'which reduces the load on hosts.')
+flags.DEFINE_boolean(name='enable_device_warmup', default=False,
+                    help='Whether or not to enable device warmup. This '
+                    'includes training on dummy data and enabling graph/XLA '
+                    'compilation before run_start.')
+flags.DEFINE_integer(name='device_warmup_steps', default=1,
+                    help='The number of steps to apply for device warmup.')
+flags.DEFINE_integer(name='num_replicas', default=32,
+                    help='The number of TPU cores to use, '
+                    'for log printout only.')
 FLAGS = flags.FLAGS
 
 
@@ -602,3 +623,27 @@ def preprocess_image(image_buffer, bbox, output_height, output_width,
   image.set_shape([output_height, output_width, num_channels])
 
   return _mean_image_subtraction(image, CHANNEL_MEANS, num_channels)
+
+
+def main(_):
+  x=input_fn(is_training=True,
+             data_dir='/home/imagenet/train',
+             batch_size=1,
+             dtype=tf.float32,
+             datasets_num_private_threads=None,
+             input_context=None,
+             drop_remainder=False,
+             tf_data_experimental_slack=False,
+             dataset_cache=False,
+             filenames=None,
+             prefetch_batchs=tf.data.experimental.AUTOTUNE)
+  print([z for z in x.take(1)])
+  import pdb; pdb.set_trace()
+  parsed_dataset = parsed_dataset.prefetch(1)
+
+if __name__ == '__main__':
+  import common
+  from absl import app
+  logging.set_verbosity(logging.INFO)
+  common.define_keras_flags()
+  app.run(main)

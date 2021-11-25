@@ -29,7 +29,7 @@ import tensorflow as tf
 from tf2_common.utils.flags import core as flags_core
 from tf2_common.utils.misc import keras_utils
 from tf2_common.utils.mlp_log import mlp_log
-import imagenet_preprocessing
+# import imagenet_preprocessing
 import lars_optimizer
 import lars_util
 from tensorflow.python.keras.optimizer_v2 import gradient_descent as gradient_descent_v2
